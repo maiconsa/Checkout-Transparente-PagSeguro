@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<?php if(!class_exists('Rain\Tpl')){exit;}?><!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -21,7 +21,7 @@
 
 
     <!---PagSeguro Librarys -->
-    <script type="text/javascript" src="{$stc}/pagseguro/api/v2/checkout/pagseguro.directpayment.js"></script>
+    <script type="text/javascript" src="<?php echo htmlspecialchars( $stc, ENT_COMPAT, 'UTF-8', FALSE ); ?>/pagseguro/api/v2/checkout/pagseguro.directpayment.js"></script>
 
     <!-- Personal CSS and JS Files -->
     <link rel="stylesheet" type="text/css" media="all" href="/views/res/css/main.css">

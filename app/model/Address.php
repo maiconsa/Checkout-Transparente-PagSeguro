@@ -7,11 +7,16 @@
  */
 namespace App\model;
 
+use App\pagseguro\PagSeguroModel;
+
 class Address
 {
-    const  SHIPPING = 'shipping';
 
-    const  BILlING = 'billing';
+    const SHIPPING_TYPE = 0;
+
+    const BILLING_TYPE = 1;
+
+    const  PERSONAL_TYPE  = 2;
 
     private  $street;
 
@@ -28,6 +33,24 @@ class Address
     private  $state;
 
     private $country;
+
+    private $type;
+
+    /**
+     * @return mixed
+     */
+    public function getType():int
+    {
+        return $this->type;
+    }
+
+    /**
+     * @param mixed $type
+     */
+    public function setType(int $type)
+    {
+        $this->type = $type;
+    }
 
     /**
      * Address constructor.
@@ -181,20 +204,26 @@ class Address
     }
 
 
-    public function getData($addresType = Address::BILlING ){
-        if($addresType != Address::BILlING  && $addresType != Address::SHIPPING  ){
-            return [];
+    public function getData(){
+        switch ($this->getType()){
+            case Address::SHIPPING_TYPE:
+                $prefix = PagSeguroModel::SHIPPING_PREFIX;
+                break;
+            case Address::BILLING_TYPE:
+                $prefix = PagSeguroModel::BILLING_PREFIX;
+                break;
+            default:
+                $prefix = "";
         }
-        $prefixo = $addresType.'Address';
         $dataArray = [
-            $prefixo.'Street' => $this->getStreet(),
-            $prefixo.'Number' => $this->getNumber(),
-            $prefixo.'Complement' =>$this->getComplement(),
-            $prefixo.'District' =>$this->getDistrict(),
-            $prefixo.'PostalCode' =>$this->getPostalCode(),
-            $prefixo.'City' =>$this->getCity(),
-            $prefixo.'State' =>$this->getState(),
-            $prefixo.'Country' =>$this->getCountry()
+            $prefix.'Street' => $this->getStreet(),
+            $prefix.'Number' => $this->getNumber(),
+            $prefix.'Complement' =>$this->getComplement(),
+            $prefix.'District' =>$this->getDistrict(),
+            $prefix.'PostalCode' =>$this->getPostalCode(),
+            $prefix.'City' =>$this->getCity(),
+            $prefix.'State' =>$this->getState(),
+            $prefix.'Country' =>$this->getCountry()
 
         ];
 

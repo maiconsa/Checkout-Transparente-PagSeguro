@@ -1,11 +1,10 @@
+
 *{
     padding: 0px;
     margin: 0px;
 }
+
 #main-container{
-    margin: 0 auto;
     width: 50%;
-    height: 100%;
-
+    margin: 0px auto;
 }
-

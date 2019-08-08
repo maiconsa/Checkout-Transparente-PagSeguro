@@ -1,4 +1,4 @@
-
+<?php if(!class_exists('Rain\Tpl')){exit;}?>
 
 <h3>Sender Register</h3>
 
@@ -62,7 +62,7 @@
                     <label for="sate">State</label>
                     <select id="sate" name="state" class="form-control">
                         <option selected>Choose...</option>
-                        {include="states"}
+                        <?php require $this->checkTemplate("states");?>
                     </select>
                 </div>
             </div>

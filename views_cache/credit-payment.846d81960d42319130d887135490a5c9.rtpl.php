@@ -1,57 +1,56 @@
-<h1>Payment with Credit Card </h1>
+<?php if(!class_exists('Rain\Tpl')){exit;}?><h3>Payment with Credit Card </h3>
 <form method="post" action="" id="credit-payment-form">
     <div class="form-row">
-        <div class="form-group col-md-4">
+        <div class="form-group col">
             <label for="cardNumber">Card Number</label>
             <input type="text"  maxlength="16" class="form-control"  id="cardNumber" value="4111111111111111">
         </div>
-        <div class="form-group col-md-1  ">
+        <div class="form-group col-lx-1 ">
             <label for="cardNumber">Brand</label>
             <img class="form-control"   src="views/res/img/empty_brand.png" id="brandImage" disabled placeholder="Bandeira"/>
         </div>
     </div>
     <div class="form-row">
-        <div class="form-group col-md-3">
+        <div class="form-group col">
             <label for="cardName">Sender Name</n></label>
             <input type="text" class="form-control" id="cardName" name="creditCardHolderName" placeholder="Nome cartão" value="Comprador Teste">
         </div>
-        <div class="form-group col-md-2">
+        <div class="form-group col-lx-2">
             <label for="cardCpf">CPF</n></label>
             <input type="text" class="form-control" id="cardCpf" name="creditCardHolderCPF" placeholder="CPF cartão" value="22111944785">
         </div>
     </div>
     <div class="form-row">
-        <div class="form-group col-md-5">
+        <div class="form-group col-lx-5">
             <label for="bithDate">Birth Date</n></label>
             <input type="date" class="form-control" id="bithDate" name="creditCardHolderBirthDate" value="1987-10-27" placeholder="Birth Date" >
         </div>
-    </div>
-    <div class="form-row">
-        <div class="form-group col-md-2">
+
+        <div class="form-group col-lx-2">
             <label for="cardAreaCode">Area Code</n></label>
             <input type="number" value="11" class="form-control" id="cardAreaCode" maxlength="2" name="creditCardHolderAreaCode" placeholder="Area Code" >
         </div>
-        <div class="form-group col-md-3">
+        <div class="form-group col">
             <label for="cardPhone">Phone</n></label>
             <input type="number" class="form-control" id="cardPhone" maxlength="9" name="creditCardHolderPhone" placeholder="Phone "  value="56273440">
         </div>
     </div>
     <div class="form-row">
-        <div class="form-group col-md-2">
+        <div class="form-group col">
             <label for="expirationMonth">Exp. Month</n></label>
             <input type="text" class="form-control" maxlength="2"  id="expirationMonth" value="12">
         </div>
-        <div class="form-group col-md-2">
+        <div class="form-group col">
             <label for="expirationYear">Exp. Year</n></label>
             <input type="text" class="form-control"  maxlength="4"   id="expirationYear" value="2030">
         </div>
-        <div class="form-group col-md-1">
+        <div class="form-group col">
             <label for="cardCodeCvv">CVV</n></label>
             <input type="text" class="form-control" id="cardCodeCvv" value="123">
         </div>
     </div>
     <div >
-        <select  id="selectInstallments"   style="visibility: hidden"  class="browser-default  custom-select col-md-5">
+        <select  id="selectInstallments"   style="visibility: hidden"  class="browser-default  custom-select col">
             <option selected> Select the installments</option>
         </select>
     </div>
@@ -77,6 +76,8 @@
                 cardNumber.keyup(function () {
                         PagSeguroGetBrand(cardNumber.val());
                 })
+
+
         });
 
         $("#credit-payment-form").on('submit',function (e) {
@@ -161,6 +162,7 @@
                 method:'POST',
                 processData:false,
                 dataType:'text',
+                responseType:'application/xml',
                 data:args,
                 success: function (response) {
                     console.log(response);
@@ -215,7 +217,14 @@
                     var brand = response.brand.name;
                     $("#brandImage").attr('src','https://stc.pagseguro.uol.com.br/public/img/payment-methods-flags/68x30/'+brand+'.png');
                     $("#brand").val(brand);
-                    PagSegureGetInstallments(500,brand);
+                    $.ajax({
+                        url:'/cart/totalAmount',
+                        method:'POST',
+                        success: function (response) {
+                            var totalAmount = response;
+                            PagSegureGetInstallments(totalAmount,brand);
+                        }
+                    });
 
                 },
                 error: function(response) {

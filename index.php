@@ -5,46 +5,41 @@ require_once ('vendor/autoload.php');
 use  \App\PageBuilder;
 use  \App\pagseguro\PagSeguroSession;
 use  \App\pagseguro\PagSeguroTransaction;
-use   \App\pagseguro\PagSeguroCredentials;
-use     \App\model\Sender;
-use     \App\pagseguro\PagSeguroConfig;
+use  \App\model\Sender;
+use  \App\pagseguro\PagSeguroConfig;
+use  \App\model\Product;
+use \App\model\Cart;
 
 //Inicia a sessão caso estiver habilitada. mas ainda não foi iniciada
 if(session_status() === PHP_SESSION_NONE ){
     session_start();
 }
-PagSeguroConfig::init('your email','your token');
+PagSeguroConfig::init('maicon-s-a@hotmail.com','63912AADC32442789850FEF493273EA4');
 PagSeguroConfig::setMode(true);
 
 $app = new \Slim\Slim();
 
 
 $app->get('/',function () use ($app){
-    if(Sender::checkSenderExist()){
-        $app->redirect('/payment');
-    }else{
-        $app->redirect('/create/sender');
-    }
-
+    $page = new PageBuilder();
+    $page->draw('home',["item-menu" => 0]);
 
 });
 
 $app->get('/payment',function ()use ($app){
-    if(!Sender::checkSenderExist()){
-        $app->redirect("/");
-    }
         $page = new PageBuilder();
-        $page->draw('payment');
+        $page->draw('payment',["item-menu" => 0]);
 
 
 });
 
 $app->get('/create/sender',function() use($app){
     $page = new PageBuilder();
-    $page->draw('personal-information');
+    $page->draw('personal-information',["item-menu" => 1]);
 });
 
 $app->post('/create/sender',function () use($app){
+
         $sender = new Sender($_POST['name'],$_POST['cpf'],$_POST['areaCode'],$_POST['phone'],$_POST['email']);
 
         $address = new \App\model\Address();
@@ -59,28 +54,26 @@ $app->post('/create/sender',function () use($app){
 
         $sender->setAddress($address);
 
-        $_SESSION[Sender::SENDER] = $sender;
+        $sender->setToSession();
 
-        $app->redirect('/payment');
+        $app->redirect('/create/sender');
+
 
 });
 
 $app->get('/sender/unregister',function () use ($app){
-    unset($_SESSION[Sender::SENDER]);
+    Sender::removeFromSession();
     $app->redirect('/');
 });
 
 $app->get('/boleto',function() use ($app){
-    if(!Sender::checkSenderExist()){
-        $app->redirect("/");
-    }
+
     $page = new PageBuilder();
-    $page->draw('boleto-payment');
+    $page->draw('bolet-payment');
 
 });
 
 $app->post('/session',function () use ($app){
-    Sender::checkSenderExist();
     $pagsession = new PagSeguroSession(PagSeguroConfig::getCredentials());
     $_SESSION[PagSeguroSession::SESSION_ID] = $pagsession->executeService();
     echo $_SESSION[PagSeguroSession::SESSION_ID];
@@ -88,63 +81,83 @@ $app->post('/session',function () use ($app){
 });
 
 $app->get('/credit',function(){
-    Sender::checkSenderExist();
     $page = new PageBuilder();
-
-    $page->draw('credito-payment');
+    $page->draw('credit-payment');
 });
 $app->post('/credit/transaction',function()use ($app){
-    Sender::checkSenderExist();
-    $data = [
-        'paymentMode'=>'default',
-        'paymentMethod'=>'creditCard',
-        'receiverEmail'=>'maicon-s-a@hotmail.com',
-        'currency'=>'BRL',
-        'extraAmount'=>'0.00',
-        'itemId1'=>'0001',
-        'itemDescription1'=>'Notebook Prata',
-        'itemAmount1'=>'500.00',
-        'itemQuantity1'=>'1',
-        'notificationURL'=> 'https://sualoja.com.br/notifica.html',
-        'reference'=>'REF1234',
-        'noInterestInstallmentQuantity' => 3,
 
-        'shippingAddressRequired' => 'true',
-        'shippingType'=>'3',
-        'shippingCost'=>'0.00'
+     if(Sender::checkExistInSession() == false){
+        $app->redirect("/create/sender");
+    }else {
+         $data = [
+             'paymentMode' => 'default',
+             'paymentMethod' => 'creditCard',
+             'receiverEmail' => 'maicon-s-a@hotmail.com',
+             'currency' => 'BRL',
+             'extraAmount' => '0.00',
+             'notificationURL' => 'https://sualoja.com.br/notifica.html',
+             'reference' => 'REF1234',
+             'noInterestInstallmentQuantity' => 3,
+             'shippingAddressRequired' => 'true',
+             'shippingType' => '3',
+             'shippingCost' => '0.00'
+         ];
+         foreach ($_POST as $key => $value) {
+             if ($key == 'creditCardHolderBirthDate') {
+                 $date = new DateTime($value);
+                 $data[$key] = $date->format('d/m/Y');
+             } else {
+                 $data[$key] = $value;
+             }
+         }
+         $sender = Sender::getFromSession();
+         $cart = Cart::getFromSession();
+         $address = $sender->getAddress();
+         $senderData = $sender->getData();
+         $address->setType(\App\model\Address::SHIPPING_TYPE);
+         $shippingData = $address->getData();
+         $address->setType(\App\model\Address::BILLING_TYPE);
+         $billingData = $address->getData();
 
-    ];
-    foreach ($_POST as $key => $value){
-        if($key == 'creditCardHolderBirthDate'){
-            $date = new DateTime($value);
-            $data[$key] = $date->format('d/m/Y');
-        }else{
-            $data[$key] = $value;
-        }
+         $itemsData = $cart->getData();
 
-    }
+         $data = $data + $itemsData + $senderData + $shippingData + $billingData;
 
-    $sender = Sender::getSenderFromSession();
+         $transaction = new PagSeguroTransaction(PagSeguroConfig::getCredentials());
+         $response = $transaction->executeService($data);
 
-    $senderData = $sender->getData();
-    $address = $sender->getAddress();
+         echo $response;
+     }
 
-    $shippingData = $address->getData(\App\model\Address::SHIPPING);
-    $billingData = $address->getData(\App\model\Address::BILlING);
+});
 
-    $data = $data + $senderData + $shippingData  + $billingData;
+$app->post('/cart/totalAmount',function(){
+    echo Cart::getFromSession()->getTotalAmount();
 
-    $transaction = new PagSeguroTransaction(PagSeguroConfig::getCredentials());
-     $response = $transaction->executeService($data);
-    var_dump($response);
 });
 
 $app->get('/debit',function(){
-    Sender::checkSenderExist();
     $page = new PageBuilder();
-    $page->draw('debito-payment');
+    $page->draw('debit-payment');
 });
 
+
+$app->get('/cart',function (){
+    var_dump( Cart::getFromSession()->getItems());
+
+});
+$app->get('/cart/add/:id',function ($id) use ($app){
+    if(Cart::checkExistInSession()){
+        $cart = Cart::getFromSession();
+    }else{
+        $cart = new Cart();
+    }
+    $cart->addProduct(new Product($id,'Xiomi Redmi',500 ,1));
+    $cart->setToSession();
+
+    $app->redirect('/cart');
+
+});
 
 
 

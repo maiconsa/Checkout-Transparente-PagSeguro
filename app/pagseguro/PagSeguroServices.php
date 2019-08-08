@@ -39,7 +39,7 @@ abstract class PagSeguroServices
     public function getServiceUrl(){
         return PagSeguroConfig::getWSBaseUrl();
     }
-    public function executeService($data = null){}
+    abstract public function executeService($data = null);
 
 
 

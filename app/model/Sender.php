@@ -3,9 +3,13 @@
 namespace App\model;
 
 
-class Sender
+use App\pagseguro\PagSeguroModel;
+use App\Sessionable;
+
+class Sender extends PagSeguroModel implements Sessionable
 {
     const SENDER = 'SENDER';
+
     private $name;
 
     private $cpf;
@@ -135,29 +139,38 @@ class Sender
     }
 
 
-    public function getData(){
+    public function getData($useful = null):array {
+        $prefix = PagSeguroModel::SENDER_PREFIX;
         $dataArray = [
-            'senderName'=> $this->getName(),
-            'senderCPF'=> $this->getCpf(),
-            'senderAreaCode'=>$this->getAreaCode(),
-            'senderPhone'=> $this->getPhone(),
-            'senderEmail' => $this->getEmail()
+            $prefix.'Name'=> $this->getName(),
+            $prefix.'CPF'=> $this->getCpf(),
+            $prefix.'AreaCode'=>$this->getAreaCode(),
+            $prefix.'Phone'=> $this->getPhone(),
+            $prefix.'Email' => $this->getEmail()
         ];
         return $dataArray;
     }
 
-    public static function getSenderFromSession():Sender{
+
+    public static function getFromSession():Sender{
         return  $_SESSION[Sender::SENDER];
 }
 
-    public static function checkSenderExist(){
-       return  array_key_exists(Sender::SENDER,$_SESSION) == true && isset($_SESSION[Sender::SENDER]) == true;
+    public function setToSession()
+    {
+        $_SESSION[Sender::SENDER] = $this;
+    }
 
-
+    public static function checkExistInSession()
+    {
+        return  array_key_exists(Sender::SENDER,$_SESSION) == true && isset($_SESSION[Sender::SENDER]) == true;
 
     }
 
-
+    public static function removeFromSession()
+    {
+        unset($_SESSION[Sender::SENDER]);
+    }
 
 
 }

@@ -24,8 +24,7 @@ class PagSeguroTransaction extends PagSeguroServices
             $conn->post($this->getServiceUrl(),$data);
           $response  = $conn->getResponse();
             if ($conn->getStatus() === 200){
-               $object =  simplexml_load_string($response);
-                return $object;
+                return $response;
             }
             return $response;
     }
