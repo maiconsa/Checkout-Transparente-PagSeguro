@@ -14,7 +14,7 @@ use \App\model\Cart;
 if(session_status() === PHP_SESSION_NONE ){
     session_start();
 }
-PagSeguroConfig::init('maicon-s-a@hotmail.com','63912AADC32442789850FEF493273EA4');
+PagSeguroConfig::init('YOUR EMAIL','YOUR TOKEN');
 PagSeguroConfig::setMode(true);
 
 $app = new \Slim\Slim();
