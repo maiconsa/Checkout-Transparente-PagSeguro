@@ -92,7 +92,8 @@ class Product extends PagSeguroModel
      */
     public function getAmount()
     {
-        return $this->amount;
+       $f =  number_format($this->amount,2,'.','');
+        return $f;
     }
 
     /**
@@ -143,7 +144,7 @@ class Product extends PagSeguroModel
         $dataArray =[
             $prefix.'Id'.$useful => $this->getId(),
             $prefix.'Description'.$useful => $this->getDescription(),
-            $prefix.'Amount'.$useful => number_format($this->getAmount(),2),
+            $prefix.'Amount'.$useful => $this->getAmount(),
             $prefix.'Quantity'.$useful => $this->getQuantity()
         ];
 

@@ -204,7 +204,7 @@ class Address
     }
 
 
-    public function getPagSeguroData():array{
+    public function getDataPagSeguro($useful = null):array{
         switch ($this->getType()){
             case Address::SHIPPING_TYPE:
                 $prefix = PagSeguroModel::SHIPPING_PREFIX;

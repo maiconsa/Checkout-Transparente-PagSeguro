@@ -14,7 +14,7 @@ use \App\model\Cart;
 if(session_status() === PHP_SESSION_NONE ){
     session_start();
 }
-PagSeguroConfig::init('YOUR EMAIL','YOU TOKEN');
+PagSeguroConfig::init('maicon-s-a@hotmail.com','63912AADC32442789850FEF493273EA4');
 PagSeguroConfig::setMode(true);
 
 $app = new \Slim\Slim();
@@ -90,24 +90,15 @@ $app->get('/credit',function(){
     $page = new PageBuilder();
     $page->draw('credit-payment');
 });
+
+
 $app->post('/credit/transaction',function()use ($app){
 
      if(Sender::checkExistInSession() == false){
         $app->redirect("/create/sender");
     }else {
-         $data = [
-             'paymentMode' => 'default',
-             'paymentMethod' => 'creditCard',
-             'receiverEmail' => 'maicon-s-a@hotmail.com',
-             'currency' => 'BRL',
-             'extraAmount' => '0.00',
-             'notificationURL' => 'https://sualoja.com.br/notifica.html',
-             'reference' => 'REF1234',
-             'noInterestInstallmentQuantity' => 3,
-             'shippingAddressRequired' => 'true',
-             'shippingType' => '3',
-             'shippingCost' => '0.00'
-         ];
+         
+        $data = PagSeguroConfig::getDefaults() ;
          foreach ($_POST as $key => $value) {
              if ($key == 'creditCardHolderBirthDate') {
                  $date = new DateTime($value);
@@ -128,11 +119,11 @@ $app->post('/credit/transaction',function()use ($app){
          $itemsData = $cart->getDataPagSeguro();
 
          $data = $data + $itemsData + $senderData + $shippingData + $billingData;
-
+        
          $transaction = new PagSeguroTransaction(PagSeguroConfig::getCredentials());
          $response = $transaction->executeService($data);
-
-         echo $response;
+        
+    
      }
 
 });

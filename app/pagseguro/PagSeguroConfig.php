@@ -6,6 +6,22 @@ namespace App\pagseguro;
 
 final class PagSeguroConfig
 {
+
+    private static $defaults =[
+            'paymentMode' => 'default',
+            'paymentMethod' => 'creditCard',
+            'receiverEmail' => 'maicon-s-a@hotmail.com',
+            'currency' => 'BRL',
+            'extraAmount' => '0.00',
+            'notificationURL' => 'https://sualoja.com.br/notifica.html',
+            'reference' => 'REF1234',
+            'noInterestInstallmentQuantity' => 3,
+            'shippingAddressRequired' => 'true',
+            'shippingType' => '3',
+            'shippingCost' => '0.00'
+        ];
+    
+
     const WS_SANDBOX_URL = 'https://ws.sandbox.pagseguro.uol.com.br';
     const WS_PRODUCTION_URL = 'https://ws.pagseguro.uol.com.br';
 
@@ -48,5 +64,9 @@ final class PagSeguroConfig
         }else{
             return PagSeguroConfig::WS_PRODUCTION_URL.PagSeguroConfig::VERSION;
         }
+    }
+
+    public static function getDefaults(){
+        return self::$defaults;
     }
 }

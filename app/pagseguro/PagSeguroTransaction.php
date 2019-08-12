@@ -1,13 +1,10 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: maico
- * Date: 02/08/2019
- * Time: 00:35
- */
+
 
 namespace App\pagseguro;
 
+
+use App\pagseguro\PagSeguroLogs;
 
 class PagSeguroTransaction extends PagSeguroServices
 {
@@ -23,9 +20,17 @@ class PagSeguroTransaction extends PagSeguroServices
             $conn = new CurlConnection();
             $conn->post($this->getServiceUrl(),$data);
           $response  = $conn->getResponse();
+
+           $code = -1;
             if ($conn->getStatus() === 200){
-                return $response;
+                     $object = simplexml_load_string($response);         
+                    $code = $object->code;       
+            }else{  
+                $code = 'error_'.date('dmYHis');   
             }
-            return $response;
+            PagSeguroLogs::save($code,$response);     
+            return $code;
+
+
     }
 }
