@@ -1,6 +1,6 @@
 <?php
 /**
- * Created by PhpStorm.
+
  * User: maico
  * Date: 07/08/2019
  * Time: 09:01
@@ -19,5 +19,5 @@ abstract class PagSeguroModel
 
     const  BILLING_PREFIX = 'billingAddress';
 
-    abstract public function getData($useful = null):array ;
+    abstract public function getDataPagSeguro($useful = null):array;
 }

@@ -19,7 +19,13 @@ class Cart extends PagSeguroModel implements Sessionable
     private $products = [];
 
     public function addProduct(Product $product){
-        array_push($this->products,$product);
+        $findedProd = $this->searchProduct($product->getId());
+        if($findedProd == null){
+             array_push($this->products,$product);
+        }else{
+            $findedProd = $this->castingToProduct($findedProd);
+            $findedProd->addQuantity($product->getQuantity());
+        }
     }
 
     public  function removeProduct(Product $product){
@@ -29,6 +35,14 @@ class Cart extends PagSeguroModel implements Sessionable
 
     public function getItems(){
         return $this->products;
+    }
+
+    public function getData():array{
+        $data = [];
+        foreach ($this->products as $object){
+            array_push($data,$this->castingToProduct( $object)->getData());
+                }
+        return $data;
     }
 
     public function clear(){
@@ -45,11 +59,11 @@ class Cart extends PagSeguroModel implements Sessionable
     }
 
     public static function getFromSession():Cart
-    {
-        return  $_SESSION[Cart::CART];
+    {   
+                return $_SESSION[Cart::CART];
     }
 
-    public static function checkExistInSession()
+    public static function checkExistInSession():bool
     {
         return  array_key_exists(Cart::CART,$_SESSION) == true && isset($_SESSION[Cart::CART]) == true;
     }
@@ -59,15 +73,16 @@ class Cart extends PagSeguroModel implements Sessionable
         unset($_SESSION[Sender::SENDER]);
     }
 
-
-    public function getData($useful = null): array
+    
+    public function getDataPagSeguro($useful = null): array
     {
         $dataArray = array();
         foreach ($this->products as $key =>$value){
-           $dataArray = $dataArray + $this->castingToProduct($value)->getData($key+1);
+           $dataArray = $dataArray + $this->castingToProduct($value)->getDataPagSeguro($key+1);
         };
         return $dataArray;
     }
+
 
     public function getTotalAmount(){
         $totalAmount = 0;
@@ -80,4 +95,16 @@ class Cart extends PagSeguroModel implements Sessionable
     private function  castingToProduct($object):Product{
         return $object;
     }
+
+
+    public function searchProduct($id){
+        foreach($this->products as $key =>$value){ 
+            $product = $this->castingToProduct($value);
+            if($id == $product->getId()){
+               return $product;
+            }         
+        };
+        return null;
+    }
+
 }

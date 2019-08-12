@@ -139,7 +139,7 @@ class Sender extends PagSeguroModel implements Sessionable
     }
 
 
-    public function getData($useful = null):array {
+    public function getDataPagSeguro($useful = null):array {
         $prefix = PagSeguroModel::SENDER_PREFIX;
         $dataArray = [
             $prefix.'Name'=> $this->getName(),

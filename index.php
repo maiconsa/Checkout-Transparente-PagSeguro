@@ -1,6 +1,6 @@
 <?php
 
-require_once ('vendor/autoload.php');
+require_once ('./vendor/autoload.php');
 
 use  \App\PageBuilder;
 use  \App\pagseguro\PagSeguroSession;
@@ -14,11 +14,14 @@ use \App\model\Cart;
 if(session_status() === PHP_SESSION_NONE ){
     session_start();
 }
-PagSeguroConfig::init('YOUR EMAIL','YOUR TOKEN');
+PagSeguroConfig::init('YOUR EMAIL','YOU TOKEN');
 PagSeguroConfig::setMode(true);
 
 $app = new \Slim\Slim();
 
+$app->get('/test',function(){
+   
+});
 
 $app->get('/',function () use ($app){
     $page = new PageBuilder();
@@ -27,6 +30,7 @@ $app->get('/',function () use ($app){
 });
 
 $app->get('/payment',function ()use ($app){
+
         $page = new PageBuilder();
         $page->draw('payment',["item-menu" => 0]);
 
@@ -39,6 +43,7 @@ $app->get('/create/sender',function() use($app){
 });
 
 $app->post('/create/sender',function () use($app){
+
 
         $sender = new Sender($_POST['name'],$_POST['cpf'],$_POST['areaCode'],$_POST['phone'],$_POST['email']);
 
@@ -74,6 +79,7 @@ $app->get('/boleto',function() use ($app){
 });
 
 $app->post('/session',function () use ($app){
+
     $pagsession = new PagSeguroSession(PagSeguroConfig::getCredentials());
     $_SESSION[PagSeguroSession::SESSION_ID] = $pagsession->executeService();
     echo $_SESSION[PagSeguroSession::SESSION_ID];
@@ -113,13 +119,13 @@ $app->post('/credit/transaction',function()use ($app){
          $sender = Sender::getFromSession();
          $cart = Cart::getFromSession();
          $address = $sender->getAddress();
-         $senderData = $sender->getData();
+         $senderData = $sender->getDataPagSeguro();
          $address->setType(\App\model\Address::SHIPPING_TYPE);
-         $shippingData = $address->getData();
+         $shippingData = $address->getDataPagSeguro();
          $address->setType(\App\model\Address::BILLING_TYPE);
-         $billingData = $address->getData();
+         $billingData = $address->getDataPagSeguro();
 
-         $itemsData = $cart->getData();
+         $itemsData = $cart->getDataPagSeguro();
 
          $data = $data + $itemsData + $senderData + $shippingData + $billingData;
 
@@ -143,16 +149,45 @@ $app->get('/debit',function(){
 
 
 $app->get('/cart',function (){
-    var_dump( Cart::getFromSession()->getItems());
+    $data = [];
+    if(Cart::checkExistInSession()){
+        $cart = Cart::getFromSession();
+        $data  = $cart->getData();
+    }
+ 
+    $page = new PageBuilder();
+    $page->draw('cart',["items" => $data]);
+ 
 
 });
+
+$app->get('/cart/clear',function() use ($app){ 
+    if(Cart::checkExistInSession()){
+        $cart = Cart::getFromSession();
+        $cart->clear();
+
+        $app->redirect('/cart');
+    }
+});
 $app->get('/cart/add/:id',function ($id) use ($app){
+
     if(Cart::checkExistInSession()){
         $cart = Cart::getFromSession();
     }else{
         $cart = new Cart();
     }
-    $cart->addProduct(new Product($id,'Xiomi Redmi',500 ,1));
+    switch($id){
+        case 1:
+        $cart->addProduct(new Product($id,'Xiomi Redmi',500.00 ,1));
+        break;
+        case 2:
+        $cart->addProduct(new Product($id,'Motorola One Vision',1649.00 ,1));
+        break;
+        case 3:
+        $cart->addProduct(new Product($id,'Motorola Moto G7',849.00 ,1));
+        break;
+    }
+ 
     $cart->setToSession();
 
     $app->redirect('/cart');
@@ -162,7 +197,6 @@ $app->get('/cart/add/:id',function ($id) use ($app){
 
 
 $app->run();
-
 
 
 

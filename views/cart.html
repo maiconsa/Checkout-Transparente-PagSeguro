@@ -1,0 +1,31 @@
+<h3>Resume</h3>
+
+<h3>My Products</h3>
+<table class="table">
+        <thead>
+          <tr>
+            <th scope="col">#ID</th>
+            <th scope="col">Description</th>
+            <th scope="col">Amount</th>
+            <th scope="col">Quantity</th>
+            <th scope="col">Total </th>
+          </tr>
+        </thead>
+        <tbody>
+        {loop="$items"}
+            <tr>
+                <th scope="row">{$value.id}</th>
+                <td>{$value.description}</td>
+                <td>{$value.amount}</td>
+                <td>{$value.quantity}</td>
+                <td>{$value.quantity * $value.amount}</td>
+            </tr>
+          {/loop}
+
+        </tbody>
+        <tfooter>
+                <tr>
+                        <td><a class= "btn btn-primary btn-lg"href="/cart/clear">Clear</a></td>
+                    </tr>  
+        </tfooter>
+</table>

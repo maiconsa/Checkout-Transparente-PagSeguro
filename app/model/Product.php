@@ -119,9 +119,23 @@ class Product extends PagSeguroModel
         $this->quantity = $quantity;
     }
 
+    public function addQuantity(int $quantity){
+        $this->quantity+= $quantity;
+    }
 
+    public function getData():array{
+        $data = [
+            'id' => $this->getId(),
+            'description' => $this->getDescription(),
+            'amount' => $this->getAmount(),
+            'quantity' =>$this->getQuantity()
+        ];
 
-    public function getData($useful = null):array{
+        return $data;
+
+    }
+
+    public function getDataPagSeguro($useful = null):array{
         if($useful == null || strlen($useful) == 0){
             throw new Exception("You must pass a useful args as  '1', '2', '3'... -  useful value: $useful");
         }
