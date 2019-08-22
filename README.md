@@ -6,10 +6,10 @@ Utilizando a API de pagamento do <b>PagSeguro</b>.
   <br/>
   
   # Linguagens e Frameworks utilizados.
-  PHP
-  Composer 
-  Slim
-  Framework
+  PHP ,
+  Composer ,
+  Slim,
+  Framework,
   RainTPL
   
 # Status:
