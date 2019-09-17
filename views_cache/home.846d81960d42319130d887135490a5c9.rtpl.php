@@ -1,6 +1,6 @@
 <?php if(!class_exists('Rain\Tpl')){exit;}?>
 
-<div class="container">
+
         <h3>Products</h3>
 <div  class="card" style="width: 12rem;float:left;margin: 10px">
     <div class="card-header">
@@ -36,7 +36,6 @@
             </div>
         </div>
     
-</div>
 <div style="clear: both"></div>
 
 

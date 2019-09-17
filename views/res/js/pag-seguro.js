@@ -80,7 +80,7 @@ var hash = response.senderHash; //Hash estará disponível nesta variável.
 
  var args = $("#credit-payment-form").serialize();
 $.ajax({
-    url:'/credit/transaction',
+    url:'/credit',
     method:'POST',
     processData:false,
     dataType:'text',

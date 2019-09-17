@@ -9,45 +9,43 @@ use  \App\model\Sender;
 use  \App\pagseguro\PagSeguroConfig;
 use  \App\model\Product;
 use \App\model\Cart;
+use \App\model\Address;
 
 //Inicia a sessão caso estiver habilitada. mas ainda não foi iniciada
 if(session_status() === PHP_SESSION_NONE ){
     session_start();
 }
-PagSeguroConfig::init('maicon-s-a@hotmail.com','63912AADC32442789850FEF493273EA4');
+PagSeguroConfig::init('YOUR EMAIL','YOUR TOKEN');
 PagSeguroConfig::setMode(true);
 
 $app = new \Slim\Slim();
-
-$app->get('/test',function(){
-   
+$app->get('/',function(){
+     $page = new PageBuilder();
+    $page->draw('home');
 });
 
-$app->get('/',function () use ($app){
-    $page = new PageBuilder();
-    $page->draw('home',["item-menu" => 0]);
 
-});
 
-$app->get('/payment',function ()use ($app){
-
+$app->get('/payment',function () use ($app){
         $page = new PageBuilder();
-        $page->draw('payment',["item-menu" => 0]);
-
-
+        $page->draw('payment');
 });
 
 $app->get('/create/sender',function() use($app){
     $page = new PageBuilder();
-    $page->draw('personal-information',["item-menu" => 1]);
+    $page->draw('personal-information');
 });
 
 $app->post('/create/sender',function () use($app){
+        /* Register a sender */
+        $sender = new Sender($_POST['name'],
+                             $_POST['cpf'],
+                             $_POST['areaCode'],
+                             $_POST['phone'],
+                             $_POST['email']);
 
-
-        $sender = new Sender($_POST['name'],$_POST['cpf'],$_POST['areaCode'],$_POST['phone'],$_POST['email']);
-
-        $address = new \App\model\Address();
+        /* Register sender address */
+        $address = new Address();
         $address->setCity($_POST['city']);
         $address->setComplement($_POST['complement']);
         $address->setCountry($_POST['country']);
@@ -57,8 +55,10 @@ $app->post('/create/sender',function () use($app){
         $address->setStreet($_POST['street']);
         $address->setPostalCode($_POST['postalCode']);
 
+        /* Bind address to sender */
         $sender->setAddress($address);
 
+        /* Bind to current session */
         $sender->setToSession();
 
         $app->redirect('/create/sender');
@@ -66,17 +66,11 @@ $app->post('/create/sender',function () use($app){
 
 });
 
-$app->get('/sender/unregister',function () use ($app){
+$app->get('/sender/unregister',function() use ($app){
     Sender::removeFromSession();
     $app->redirect('/');
 });
 
-$app->get('/boleto',function() use ($app){
-
-    $page = new PageBuilder();
-    $page->draw('bolet-payment');
-
-});
 
 $app->post('/session',function () use ($app){
 
@@ -92,13 +86,14 @@ $app->get('/credit',function(){
 });
 
 
-$app->post('/credit/transaction',function()use ($app){
+$app->post('/credit',function()use ($app){
 
      if(Sender::checkExistInSession() == false){
-        $app->redirect("/create/sender");
+        $app->redirect('/create/sender');
     }else {
          
         $data = PagSeguroConfig::getDefaults() ;
+        $data['paymentMethod'] ='creditCard';
          foreach ($_POST as $key => $value) {
              if ($key == 'creditCardHolderBirthDate') {
                  $date = new DateTime($value);
@@ -111,9 +106,9 @@ $app->post('/credit/transaction',function()use ($app){
          $cart = Cart::getFromSession();
          $address = $sender->getAddress();
          $senderData = $sender->getDataPagSeguro();
-         $address->setType(\App\model\Address::SHIPPING_TYPE);
+         $address->setType(Address::SHIPPING_TYPE);
          $shippingData = $address->getDataPagSeguro();
-         $address->setType(\App\model\Address::BILLING_TYPE);
+         $address->setType(Address::BILLING_TYPE);
          $billingData = $address->getDataPagSeguro();
 
          $itemsData = $cart->getDataPagSeguro();
@@ -122,8 +117,7 @@ $app->post('/credit/transaction',function()use ($app){
         
          $transaction = new PagSeguroTransaction(PagSeguroConfig::getCredentials());
          $response = $transaction->executeService($data);
-        
-    
+         echo $response;
      }
 
 });
@@ -137,6 +131,51 @@ $app->get('/debit',function(){
     $page = new PageBuilder();
     $page->draw('debit-payment');
 });
+$app->post('/debit',function () use($app){
+
+
+});
+
+$app->post('/notification',function(){
+
+    $page = new PageBuilder();
+    $page->draw('notification',$_POST);
+
+});
+
+$app->get('/billet',function() use($app){
+ 
+    $page = new PageBuilder();
+    $page->draw('billet-payment');
+});
+$app->post('/billet',function() use($app){
+
+    
+    if(Sender::checkExistInSession() == false){
+        $app->redirect('/create/sender');
+    }else {
+        $data = PagSeguroConfig::getDefaults() ;
+        $data['paymentMethod'] ='boleto';
+
+        $sender = Sender::getFromSession();
+        $cart = Cart::getFromSession();
+        $address = $sender->getAddress();
+        $senderData = $sender->getDataPagSeguro();
+        $address->setType(Address::SHIPPING_TYPE);
+        $shippingData = $address->getDataPagSeguro();
+
+        $itemsData = $cart->getDataPagSeguro();
+
+        $data = $data + $itemsData + $senderData + $shippingData;
+       
+        $transaction = new PagSeguroTransaction(PagSeguroConfig::getCredentials());
+        $response = $transaction->executeService($data);
+        
+        echo $response;
+    
+
+    }
+});
 
 
 $app->get('/cart',function (){
@@ -147,9 +186,14 @@ $app->get('/cart',function (){
     }
  
     $page = new PageBuilder();
-    $page->draw('cart',["items" => $data]);
+    $page->draw('cart',['items' => $data]);
  
 
+});
+
+$app->get('/notification',function() use ($app){
+    $page = new PageBuilder();
+    $page->draw('notification');
 });
 
 $app->get('/cart/clear',function() use ($app){ 

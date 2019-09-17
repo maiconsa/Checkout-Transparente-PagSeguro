@@ -4,8 +4,9 @@
                  <div class="row">
                             <div class="col">
                                 <div class="form-check">
-                                    <a class="btn btn-primary" href="/boleto"   id="boleto" >
-                                        Boleto
+                                    
+                                    <a class="btn btn-primary" href="/billet"   id="billet" >
+                                        Gerar Boleto
                                     </a>
                                 </div>
                             </div>
@@ -34,14 +35,37 @@
 <script type="text/javascript">
     $(document).ready(function(){
         $.ajax({
-            url: "session",
+            url: "/session",
             success:function (response) {
-                console.log(response);
                 PagSeguroDirectPayment.setSessionId(response);
                 PagSeguroGetPaymentMethods(500);
             },
             method : 'POST'
         });
+    });
+
+
+    $("#billet").on('click',function(ev){
+        ev.preventDefault();
+        PagSeguroDirectPayment.onSenderHashReady(function(response){
+            if(response.status == 'error') {
+              alert(response.message);
+                 return false;
+            }else{
+                let  hash = response.senderHash;
+                $.ajax({
+                    url:"/billet",method:'POST',
+                    success:function(response){
+                        let paymentLink = response;
+                        window.open(paymentLink);
+                    },
+                    data:"senderHash="+hash
+                });
+            }
+
+        });
+
+
     });
 
     function PagSeguroGetPaymentMethods(amount){

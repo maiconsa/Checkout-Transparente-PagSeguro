@@ -31,11 +31,8 @@
 </head>
 
 <body>
-<!--<header style="width: 100vw;height: 8vh;background-color: lightsteelblue">
-    <h2>Exemplo de Utilização de pagamento PagSeguro</h2>
-</header>-->
 
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
+<nav class="navbar navbar-expand-lg navbar-color ">
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
@@ -50,7 +47,7 @@
 </nav>
 
 
-<div id="#main-container" style="width: 50vw;margin: 0px auto;"> <!-- Start Main Container -->
+<div class="container"> <!-- Start Main Container -->
 
 
 

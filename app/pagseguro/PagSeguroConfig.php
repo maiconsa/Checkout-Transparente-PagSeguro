@@ -9,11 +9,10 @@ final class PagSeguroConfig
 
     private static $defaults =[
             'paymentMode' => 'default',
-            'paymentMethod' => 'creditCard',
             'receiverEmail' => 'maicon-s-a@hotmail.com',
             'currency' => 'BRL',
             'extraAmount' => '0.00',
-            'notificationURL' => 'https://sualoja.com.br/notifica.html',
+            'notificationURL' => 'http://localhost/notification',
             'reference' => 'REF1234',
             'noInterestInstallmentQuantity' => 3,
             'shippingAddressRequired' => 'true',
@@ -36,6 +35,8 @@ final class PagSeguroConfig
 
     public static function init($email,$token){
         self::$credentials = new PagSeguroCredentials($email,$token);
+
+        header("access-control-allow-origin: https://sandbox.pagseguro.uol.com.br");
     }
 
     public static function getCredentials(){

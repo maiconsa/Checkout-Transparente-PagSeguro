@@ -11,6 +11,8 @@ class PagSeguroTransaction extends PagSeguroServices
     const SERVICE_NAME = 'transactions';
 
 
+
+
     public function getServiceUrl()
     {
         return parent::getServiceUrl().PagSeguroTransaction::SERVICE_NAME."?".$this->getCredential()->getHttpQuery();
@@ -23,8 +25,20 @@ class PagSeguroTransaction extends PagSeguroServices
 
            $code = -1;
             if ($conn->getStatus() === 200){
-                     $object = simplexml_load_string($response);         
-                    $code = $object->code;       
+                     $object = simplexml_load_string($response); 
+                     $method = $data['paymentMethod'];
+                     if(isset($method)){
+                         if('boleto'){
+                            $code = $object->code; 
+                            PagSeguroLogs::save($code,$response);  
+                            $paymentLink = $object->paymentLink;
+                            return $paymentLink;
+
+                         }else{
+                            $code = $object->code; 
+                         }
+                     }        
+                         
             }else{  
                 $code = 'error_'.date('dmYHis');   
             }
