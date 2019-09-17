@@ -15,7 +15,10 @@ use \App\model\Address;
 if(session_status() === PHP_SESSION_NONE ){
     session_start();
 }
+
 PagSeguroConfig::init('YOUR EMAIL','YOUR TOKEN');
+
+
 PagSeguroConfig::setMode(true);
 
 $app = new \Slim\Slim();
